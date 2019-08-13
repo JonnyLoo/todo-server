@@ -21,8 +21,10 @@ app.use(bodyParser.json(), cors());
 
 // connect to database
 // can connect to different databases based on env
-// for here in dev im using a local database
-if (process.env.NODE_ENV === 'dev') {
+// for here if env is set to local im using a local database
+// otherwise default to the mongodb database that's setup
+// i'm using mongodb atlas and if you want to take a look i can share the cluster with you
+if (process.env.NODE_ENV === 'local') {
   mongoose.connect('mongodb://localhost/todo-app', { useNewUrlParser: true });
 } else {
   mongoose.connect(DB_URL, { useNewUrlParser: true });
@@ -31,7 +33,10 @@ const db = mongoose.connection;
 
 // connected to db yay
 db.once('open', () => {
-  console.log('connected to DB');
+  console.log('connected to DB\n');
+  // uncomment require line to run db setup
+  // basically it just creates the initial list and adds one item to it
+  // require('./setup-db.js');
 });
 
 // catch db connection error

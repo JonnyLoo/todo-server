@@ -5,33 +5,29 @@ const TodoList = Models.TodoList;
 const TodoItem = Models.TodoItem;
 
 // retrieves list of items
-// basically the whole todo-list
+// in other words the whole todo-list
 const getList = (req, res) => {
-  // only one list exists for this app where
-  // name = Todo List
-  TodoList.find({ name: 'Todo List' }, (err, data) => {
-    if (err) {
-      // using 500 as generic error status code
+  console.log('GET LIST');
+  // only one list exists for this app where name = Todo List
+  TodoList.findOne({ name: 'Todo List' })
+    .then(data => {
+      // find item by looking up ids in id array
+      // wait for all queries to execute before resolving
+      // .exec returns a promise
+      Promise.all(data.items.map(id => TodoItem.findById(id).exec()))
+        .then(todoList => {
+          // send list of items
+          return res.status(200).json({ success: true, todoList: { name: data.name, items: todoList }});
+        })
+        .catch(err => {
+          // use 500 as generic error status code
+          return res.status(500).json({ error: err });
+        })
+    })
+    .catch(err => {
       return res.status(500).json({ error: err });
-    }
-
-    // need to grab all the items in the todo list
-    const todoList = [];
-    // loop through all the ids and retrieve the item info
-    for (let _id in data.items) {
-      TodoItem.find({ _id: _id }, (item_err, item_data) => {
-        if (item_err) {
-          return res.status(500).json({ error: item_err });
-        }
-
-        todoList.push(item_data);
-      });
-    }
-
-    // send the list with the actual items merged in
-    return res.status(200).json({ success: true, todoList: todoList });
-  });
-};
+    });
+}
 
 // updates item in database
 const updateItem = (req, res) => {
@@ -43,58 +39,58 @@ const updateItem = (req, res) => {
   if (req.body.dueBy) updateObj.description = req.body.dueBy;
   if (req.body.completed) updateObj.dueBy = req.body.completed;
 
-  TodoItem.update({ _id: req.params._id }, updateObj, (err) => {
-    if (err) {
+  TodoItem.update({ _id: req.params._id }, updateObj)
+    .then(() => {
+      return res.status(204).json({ success: true });
+    })
+    .catch(err => {
       return res.status(500).json({ error: err });
-    }
-
-    return res.status(200).json({ success: true });
-  })
+    });
 };
 
 // removes item in database
 // also removes item from the todo-list
 const removeItem = (req, res) => {
-  TodoItem.remove({ _id: req.params._id }, (err) => {
-    if (err) {
+  TodoItem.remove({ _id: req.params._id })
+    .then(
+      // find item in list and remove
+      TodoList.update({ name: 'Todo List' }, { $pull: { items: req.params._id }})
+        .then(() => {
+          return res.status(204).json({ success: true });
+        })
+        .catch(err => {
+          return res.status(500).json({ error: err });
+        });
+    )
+    .catch(err => {
       return res.status(500).json({ error: err });
-    }
-
-    // find item in list and remove
-    TodoList.update({ name: 'Todo List' }, { $pull: { items: req.params._id }}, (list_err) => {
-      if (list_err) {
-        return res.status(500).json({ error: list_err })
-      }
-
-      return res.status(200).json({success: true});
     });
-  })
 };
 
 // creates item in database
 // also adds item into todo-list
 const createItem = (req, res) => {
-  let item = new TodoItem({
+  const item = new TodoItem({
     name: req.body.name,
     description: req.body.description,
     dueBy: req.body.dueBy,
     completed: false
   });
 
-  item.save(err => {
-    if (err) {
+  item.save()
+    .then(() => {
+      // add item to list
+      TodoList.update({ name: 'Todo List' }, { $push: { items: item._id }})
+        .then(() => {
+          return res.status(204).json({ success: true });
+        })
+        .catch(err => {
+          return res.status(500).json({ error: err });
+        });
+    })
+    .catch(err => {
       return res.status(500).json({ error: err });
-    }
-
-    // add item to list
-    TodoList.update({ name: 'Todo List' }, { $push: { items: item._id }}, (list_err) => {
-      if (list_err) {
-        return res.status(500).json({ error: list_err });
-      }
-
-      return res.status(200).json({ success: true });
     });
-  });
 };
 
 module.exports = {
