@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const ObjectId = mongoose.Schema.Types.ObjectId;
 
+// item model
 const TodoItemSchema = new mongoose.Schema({
   name: String,
   description: String,
@@ -8,6 +9,8 @@ const TodoItemSchema = new mongoose.Schema({
   completed: Boolean
 });
 
+// full todo-list model
+// contains a list of ids referencing the related item
 const TodoListSchema = new mongoose.Schema({
   name: String,
   items: [ObjectId]

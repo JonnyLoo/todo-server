@@ -3,11 +3,11 @@ const express = require('express');
 const ROUTER = express.Router();
 const controller = require('../controllers/controller');
 
-ROUTER.get('/getItem', controller.getItem);
-ROUTER.post('/updateItem', controller.updateItem);
-ROUTER.delete('/removeItem', controller.removeItem);
-ROUTER.post('/createItem', controller.createItem);
+// link routes to their handlers
+ROUTER.get('/', controller.getList);
 
-ROUTER.get('/getList', controller.getList);
+ROUTER.post('/:_id/update', controller.updateItem);
+ROUTER.delete('/:_id/remove', controller.removeItem);
+ROUTER.post('/create', controller.createItem);
 
 module.exports = ROUTER;
