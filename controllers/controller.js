@@ -36,12 +36,12 @@ const updateItem = (req, res) => {
   const updateObj = {};
   if (req.body.name) updateObj.name = req.body.name;
   if (req.body.description) updateObj.description = req.body.description;
-  if (req.body.dueBy) updateObj.description = req.body.dueBy;
-  if (req.body.completed) updateObj.dueBy = req.body.completed;
+  if (req.body.dueBy) updateObj.dueBy = req.body.dueBy;
+  if (req.body.completed) updateObj.completed = req.body.completed;
 
-  TodoItem.update({ _id: req.params._id }, updateObj)
+  TodoItem.updateOne({ _id: req.params._id }, updateObj)
     .then(() => {
-      return res.status(204).json({ success: true });
+      return res.status(200).json({ success: true });
     })
     .catch(err => {
       return res.status(500).json({ error: err });
@@ -51,17 +51,19 @@ const updateItem = (req, res) => {
 // removes item in database
 // also removes item from the todo-list
 const removeItem = (req, res) => {
-  TodoItem.remove({ _id: req.params._id })
-    .then(
+  console.log('DELETE ITEM');
+
+  TodoItem.deleteOne({ _id: req.params._id })
+    .then(() => {
       // find item in list and remove
-      TodoList.update({ name: 'Todo List' }, { $pull: { items: req.params._id }})
+      TodoList.updateOne({ name: 'Todo List' }, { $pull: { items: req.params._id }})
         .then(() => {
-          return res.status(204).json({ success: true });
+          return res.status(200).json({ success: true });
         })
         .catch(err => {
           return res.status(500).json({ error: err });
         });
-    )
+    })
     .catch(err => {
       return res.status(500).json({ error: err });
     });
@@ -70,6 +72,8 @@ const removeItem = (req, res) => {
 // creates item in database
 // also adds item into todo-list
 const createItem = (req, res) => {
+  console.log('CREATE ITEM');
+
   const item = new TodoItem({
     name: req.body.name,
     description: req.body.description,
@@ -80,9 +84,9 @@ const createItem = (req, res) => {
   item.save()
     .then(() => {
       // add item to list
-      TodoList.update({ name: 'Todo List' }, { $push: { items: item._id }})
+      TodoList.updateOne({ name: 'Todo List' }, { $push: { items: item._id }})
         .then(() => {
-          return res.status(204).json({ success: true });
+          return res.status(201).json({ success: true, item: item });
         })
         .catch(err => {
           return res.status(500).json({ error: err });
