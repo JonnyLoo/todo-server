@@ -9,7 +9,7 @@ const TodoItem = Models.TodoItem;
 TodoItem.create({
   name: 'task 1',
   description: 'i should do task 1',
-  dueBy: (new Date()).toISOString(),
+  dueBy: (new Date()).toISOString().split('T')[0],
   completed: false
 })
 .then(item => {

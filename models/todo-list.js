@@ -5,7 +5,7 @@ const ObjectId = mongoose.Schema.Types.ObjectId;
 const TodoItemSchema = new mongoose.Schema({
   name: String,
   description: String,
-  dueBy: Date,
+  dueBy: String,
   completed: Boolean
 });
 
