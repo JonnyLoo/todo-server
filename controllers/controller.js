@@ -31,6 +31,7 @@ const getList = (req, res) => {
 
 // updates item in database
 const updateItem = (req, res) => {
+  console.log('UPDATE ITEM');
   // check for only updated fields
   // update only sets the fields which are in the update object
   const updateObj = {};
