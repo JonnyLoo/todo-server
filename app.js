@@ -6,7 +6,8 @@ const cors = require('cors');
 // could save port in config file
 const PORT = 3001;
 // should store credentials in a config file for security
-// but in this case i will leave it here to save the hassle of reading in config files for just one - two lines
+// also can attach different dbs and set this up depending on env
+// but in this case i will leave it here as there's only one db
 const DB_URL = 'mongodb+srv://todo-user_test:test123@todo-app-586aa.mongodb.net/test?retryWrites=true&w=majority';
 
 const app = express();
