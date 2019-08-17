@@ -38,7 +38,7 @@ const updateItem = (req, res) => {
   if (req.body.name) updateObj.name = req.body.name;
   if (req.body.description) updateObj.description = req.body.description;
   if (req.body.dueBy) updateObj.dueBy = req.body.dueBy;
-  if (req.body.completed) updateObj.completed = req.body.completed;
+  updateObj.completed = req.body.completed;
 
   TodoItem.updateOne({ _id: req.params._id }, updateObj)
     .then(() => {
