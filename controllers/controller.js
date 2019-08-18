@@ -4,27 +4,20 @@ const Models = require('../models/todo-list');
 const TodoList = Models.TodoList;
 const TodoItem = Models.TodoItem;
 
-// retrieves list of items
-// in other words the whole todo-list
+// retrieves all items in the specified todo list
+// with multiple users, could retrieve all todo lists of user
+// then get items in todo list
+// would use todo list id to get the name of list, along with items related but for this there's only one list so i'm cheating
 const getList = (req, res) => {
   console.log('GET LIST');
-  // only one list exists for this app where name = Todo List
-  TodoList.findOne({ name: 'Todo List' })
+  // only one list exists for this app where name is Todo List
+  TodoItem.find({ list_name: 'Todo List' })
     .then(data => {
-      // find item by looking up ids in id array
-      // wait for all queries to execute before resolving
-      // .exec returns a promise
-      Promise.all(data.items.map(id => TodoItem.findById(id).exec()))
-        .then(todoList => {
-          // send list of items
-          return res.status(200).json({ success: true, todoList: { name: data.name, items: todoList }});
-        })
-        .catch(err => {
-          // use 500 as generic error status code
-          return res.status(500).json({ error: err });
-        })
+      // send list of items
+      return res.status(200).json({ success: true, todoList: { name: 'Todo List', items: data }});
     })
     .catch(err => {
+      // use 500 as generic error status code
       return res.status(500).json({ error: err });
     });
 }
@@ -50,20 +43,13 @@ const updateItem = (req, res) => {
 };
 
 // removes item in database
-// also removes item from the todo-list
 const removeItem = (req, res) => {
   console.log('DELETE ITEM');
 
   TodoItem.deleteOne({ _id: req.params._id })
     .then(() => {
-      // find item in list and remove
-      TodoList.updateOne({ name: 'Todo List' }, { $pull: { items: req.params._id }})
-        .then(() => {
-          return res.status(200).json({ success: true });
-        })
-        .catch(err => {
-          return res.status(500).json({ error: err });
-        });
+      // delete success
+      return res.status(200).json({ success: true });
     })
     .catch(err => {
       return res.status(500).json({ error: err });
@@ -71,11 +57,11 @@ const removeItem = (req, res) => {
 };
 
 // creates item in database
-// also adds item into todo-list
 const createItem = (req, res) => {
   console.log('CREATE ITEM');
 
   const item = new TodoItem({
+    list_name: 'Todo List',
     name: req.body.name,
     description: req.body.description,
     dueBy: req.body.dueBy,
@@ -84,14 +70,8 @@ const createItem = (req, res) => {
 
   item.save()
     .then(() => {
-      // add item to list
-      TodoList.updateOne({ name: 'Todo List' }, { $push: { items: item._id }})
-        .then(() => {
-          return res.status(201).json({ success: true, item: item });
-        })
-        .catch(err => {
-          return res.status(500).json({ error: err });
-        });
+      // item successfully created
+      return res.status(201).json({ success: true, item: item });
     })
     .catch(err => {
       return res.status(500).json({ error: err });

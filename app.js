@@ -35,8 +35,7 @@ const db = mongoose.connection;
 // connected to db yay
 db.once('open', () => {
   console.log('connected to DB\n');
-  // uncomment require line to run db setup
-  // basically it just creates the initial list and adds one item to it
+  // uncomment to run db setup
   // require('./setup-db.js');
 });
 

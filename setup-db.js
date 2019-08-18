@@ -1,35 +1,29 @@
-// creates instance of TodoList in db
-// adds one instance of TodoItem to created TodoList
+// just some basic setup for the db to have initial data
 const Models = require('./models/todo-list');
 
 const TodoList = Models.TodoList;
 const TodoItem = Models.TodoItem;
 
-// create the item
-TodoItem.create({
-  name: 'task 1',
-  description: 'i should do task 1',
-  dueBy: (new Date()).toISOString().split('T')[0],
-  completed: false
-})
-.then(item => {
-  console.log('ITEM CREATED');
-  // after success creating item, create array to store id
-  const item_list = [];
-  item_list.push(item._id);
-
-  // create list with item id list
-  TodoList.create({
-    name: 'Todo List',
-    items: item_list
-  })
+// create todo list
+TodoList.create({ name: 'Todo List' })
   .then(list => {
     console.log('LIST CREATED');
+
+    // create item
+    TodoItem.create({
+      list_name: 'Todo List',
+      name: 'setup',
+      description: 'this is setup for the db',
+      dueBy: (new Date()).toISOString().split('T')[0],
+      completed: false
+    })
+    .then(item => {
+      console.log('ITEM CREATED');
+    })
+    .catch(err => {
+      console.log('OOF ERROR CREATING ITEM');
+    });
   })
   .catch(err => {
     console.log('OOF ERROR CREATING LIST');
   });
-})
-.catch(err => {
-  console.log('OOF ERROR CREATING ITEM');
-});
